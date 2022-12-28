@@ -3,7 +3,7 @@
 using namespace std;
 const int MAXSIZE = 50005;
 int rocks[MAXSIZE];
-
+ 
 bool isOK(int maxJump,int moves,int r)
 {
     int dis[MAXSIZE];
@@ -15,7 +15,7 @@ bool isOK(int maxJump,int moves,int r)
     sort(dis,dis+r);
     return dis[moves-1]>=maxJump;
 }
-
+ 
 int main()
 {
     int dis,count,move;
@@ -24,22 +24,24 @@ int main()
     {
         scanf("%d", &rocks[i]);
     }
-    int l=1,r=dis;
-    int mid=(l+r)/2;
-    int ans=1;
-    while(l<=r)
-    {
-        mid=(l+r)/2;
-        if(isOK(mid,move,count))
-        {
-            ans=mid;
-            l=mid+1;
-        }
-        else
-        {
-            l=mid+1;
-        }
-    }
-    printf("%d",ans);
+    // int l=1,r=dis;
+    // int mid=(l+r)/2;
+    // int ans=1;
+    // while(l<=r)
+    // {
+    //     mid=(l+r)/2;
+    //     if(isOK(mid,move,count))
+    //     {
+    //         ans=mid;
+    //         l=mid+1;
+    //     }
+    //     else
+    //     {
+    //         r=mid-1;
+    //     }
+    // }
+    int k=1;
+    while(isOK(k++,move,count));
+    printf("%d\n",k);
     return 0;
 }
