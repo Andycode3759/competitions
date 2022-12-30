@@ -16,16 +16,11 @@ int main()
     while (scanf("%lf%lf%lf", &x, &y, &c) == 3)
     {
         // 二分距离
-        double l = 0, r = x + y;
+        double l = 0, r = min(x, y);
         double mid;
         while (r - l > EPS)
         {
             mid = (l + r) / 2;
-            if (mid > x || mid > y)
-            {
-                r = mid;
-                continue;
-            }
             if (getHeight(x, y, mid) > c)
             {
                 l = mid;

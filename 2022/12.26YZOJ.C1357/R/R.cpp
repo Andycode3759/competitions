@@ -2,6 +2,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 const int MAXN = 33;
+const double PI = acos(-1.0);
 
 struct Point
 {
