@@ -1,36 +1,21 @@
-//UNFINISHED
-#include<bits/stdc++.h>
+// Fixed on 2023.1.2
+// ACCEPTED
+#include <bits/stdc++.h>
 using namespace std;
-
-struct Fraction
-{
-	Fraction(int u=1,int d=1)
-	{
-		up=u;
-		down=d;
-	}
-	int up,down;
-};
-
-Fraction a,b;
-int c;
-
-bool isOK(Fraction f)
-{
-	/*
-	 * if((f+a).down==c || (f+b).down==c || (f*a).down==c || (f*b).down==c)
-	 * {
-	 * 		return true;
-	 * }
-	 * 
-	 * else
-	 * {
-	 * 		return isOK(?);
-	 * }
-	 * */
-}
 
 int main()
 {
-	
+    int a, b, c;
+    while (scanf("%d%d%d", &a, &b, &c) == 3)
+    {
+        while (c > 1 && (c % a == 0 || c % b == 0))
+        {
+            if (c % a == 0)
+                c /= a;
+            if (c % b == 0)
+                c /= b;
+        }
+        printf(c == 1 ? "YES\n" : "NO\n");
+    }
+    return 0;
 }
