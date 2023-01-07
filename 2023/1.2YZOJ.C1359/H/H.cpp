@@ -4,9 +4,13 @@
 using namespace std;
 const int MAXN = 500005;
 int price[MAXN];
-int stProfit[MAXN][21], stMax[MAXN][21], stMin[MAXN][21];
-// st[i][j] => 从i号城市到i+2^j-1号城市（共2^j个）最多能赚多少钱
 int log2of[MAXN];
+
+struct STNode
+{
+    int min, max, profit;
+};
+STNode st[MAXN][21];
 
 void calcLog()
 {
@@ -27,28 +31,27 @@ int main()
     {
         scanf("%d", &price[i]);
     }
+    // preload
     for (int i = 1; i <= n; i++)
     {
-        int j = 1;
-        int rbound = min(n, i + (1 << j) - 1);
-        int pMax = -1;
-        int pMin = price[i];
-        int v = 0;
-        for (int t = i; t <= n; t++)
-        {
-            v = max(v, price[t] - pMin);
-            pMin = min(pMin, price[t]);
-            pMax = max(pMax, price[t]);
-            if (t == rbound)
-            {
-                stProfit[i][j] = v;
-                stMax[i][j] = pMax;
-                stMin[i][j] = pMin;
-                // printf("%d -> %d: %d\n", i, rbound, stProfit[i][j]);
-                j++;
-                rbound = min(n, i + (1 << j) - 1);
-            }
-            tick++;
+        st[i][0].min = price[i];
+        st[i][0].max = price[i];
+        st[i][0].profit = 0;
+    }
+    for (int j = 1; j <= log2of[MAXN - 1]; j++)
+    {
+        int len = 1 << j;
+        if (len > n)
+            break;
+        for (int i = 1; i + len - 1 <= n; i++)
+        { // max(l,r)=max(max(l,(l+r)/2),max())
+            int rbound = i + (1 << j - 1);
+            st[i][j].max = max(st[i][j - 1].max, st[rbound][j - 1].max);
+            st.min[i][j] = min(st.min[i][j - 1], st.min[rbound][j - 1]);
+            st.profit[i][j] = max(st.profit[i][j - 1], st.profit[rbound][j - 1]);
+            st.profit[i][j] = max(st.profit[i][j], st.max[rbound][j - 1] - st.min[i][j - 1]);
+
+            printf("[%d,%d]: min=%d max=%d profit=%d\n", i, i + len - 1, st.min[i][j], st.max[i][j], st.profit[i][j]);
         }
     }
     // printf("preload ticks: %lld\n", tick);
@@ -64,13 +67,15 @@ int main()
         }
 
         int log2ofLen = log2of[to - from + 1];
+        // l+2^s-1 => 'j' = s
+        //
         int rangel = to - (1 << log2ofLen) + 1;
 
-        // printf("[%d,%d] + [%d,%d] -> [%d,%d]\n", from, from + (1 << log2ofLen) - 1, rangel,
-        //        rangel + (1 << log2ofLen) - 1, from, to);
+        printf("[%d,%d] + [%d,%d] -> [%d,%d]\n", from, from + (1 << log2ofLen) - 1, rangel,
+               rangel + (1 << log2ofLen) - 1, from, to);
 
-        ans = max(stProfit[from][log2ofLen], stProfit[rangel][log2ofLen]);
-        ans = max(ans, stMax[rangel][log2ofLen] - stMin[from][log2ofLen]);
+        //?
+
         printf("%d\n", ans);
     }
     return 0;
