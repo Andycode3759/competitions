@@ -47,11 +47,11 @@ int main()
         { // max(l,r)=max(max(l,(l+r)/2),max())
             int rbound = i + (1 << j - 1);
             st[i][j].max = max(st[i][j - 1].max, st[rbound][j - 1].max);
-            st.min[i][j] = min(st.min[i][j - 1], st.min[rbound][j - 1]);
-            st.profit[i][j] = max(st.profit[i][j - 1], st.profit[rbound][j - 1]);
-            st.profit[i][j] = max(st.profit[i][j], st.max[rbound][j - 1] - st.min[i][j - 1]);
+            st[i][j].min = min(st[i][j - 1].min, st[rbound][j - 1].min);
+            st[i][j].profit = max(st[i][j - 1].profit, st[rbound][j - 1].profit);
+            st[i][j].profit = max(st[i][j].profit, st[rbound][j - 1].max - st[i][j - 1].min);
 
-            printf("[%d,%d]: min=%d max=%d profit=%d\n", i, i + len - 1, st.min[i][j], st.max[i][j], st.profit[i][j]);
+            printf("[%d,%d]: min=%d max=%d profit=%d\n", i, i + len - 1, st[i][j].min, st[i][j].max, st[i][j].profit);
         }
     }
     // printf("preload ticks: %lld\n", tick);
