@@ -1,51 +1,63 @@
-// Score: 80/100
-// TLE
+// ACCEPTED
+// Fixed on 1.9 20:42
 #include <bits/stdc++.h>
 using namespace std;
 #include "moveTo.hpp"
 
 // ===Start the submission from HERE===
 
-const int MAXN = 501;
-const int dirDelta[4][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
-const char dirs[] = "WASD";
-queue<int> quex, quey;
-string knownMap;
-bool book[MAXN][MAXN];
 // x,y=当前坐标，n=地图大小
 string find_out_map(int x, int y, int n)
 {
-    string(n * n, '1').swap(knownMap);
-    // for(int i=0;i<n*n;i++) map.append("1");
-    // map[(x-1)*n + y-1] => map[x][y]
-    // memset(map,'1',sizeof(map));
-    memset(book, false, sizeof(book));
-    knownMap[(x - 1) * n + y - 1] = '0';
-    queue<int>().swap(quex), queue<int>().swap(quey);
+    const int MAXN = 501;
+    const int dirDelta[4][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+    const char dirs[] = "WASD";
+    queue<pair<int, int>> que;
+    bool knownMap[MAXN][MAXN];
+    // bool book[MAXN][MAXN];
 
-    quex.push(x), quey.push(y);
-    while (!quex.empty())
+    for (int i = 0; i <= n; i++)
     {
-        int cx = quex.front(), cy = quey.front();
-        quex.pop(), quey.pop();
-        book[cx][cy] = true;
+        for (int j = 0; j <= n; j++)
+        {
+            knownMap[i][j] = true;
+        }
+    }
+
+    // memset(book, false, sizeof(book));
+    knownMap[x][y] = false;
+
+    que.push(make_pair(x, y));
+    while (!que.empty())
+    {
+        pair<int, int> p = que.front();
+        int cx = p.first, cy = p.second;
+        que.pop();
+        // book[cx][cy] = true;
+
         for (int d = 0; d < 4; d++)
         {
+            int nx = cx + dirDelta[d][0], ny = cy + dirDelta[d][1];
             // printf("move %c from (%d,%d): ",dirs[d],cx,cy);
-            if (move_to(dirs[d], cx, cy))
+            if (move_to(dirs[d], cx, cy) && knownMap[nx][ny])
             {
                 // printf("success\n");
-                int nx = cx + dirDelta[d][0], ny = cy + dirDelta[d][1];
-                knownMap[(nx - 1) * n + ny - 1] = '0';
-                if (!book[nx][ny])
-                {
-                    quex.push(nx), quey.push(ny);
-                }
+                knownMap[nx][ny] = false;
+                que.push(make_pair(nx, ny));
             }
             // else printf("failed\n");
         }
     }
-    return knownMap;
+    queue<pair<int, int>>().swap(que);
+    string ans = "";
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= n; j++)
+        {
+            ans.push_back(knownMap[i][j] + '0');
+        }
+    }
+    return ans;
 }
 
 // ===End the submisson HERE===
