@@ -3,3 +3,5 @@
 *.exe
 input
 output
+.cph/
+.car_running
