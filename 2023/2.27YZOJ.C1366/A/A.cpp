@@ -1,4 +1,4 @@
-// WA 9%
+// AC
 #include <bits/stdc++.h>
 using namespace std;
 const int MAXN = 6006;
@@ -6,18 +6,20 @@ typedef vector<int>::iterator intIter;
 
 int happiness[MAXN];
 bool hasBoss[MAXN];
+bool known[MAXN][2];
 int maxHappiness[MAXN][2];
 vector<int> childrenOf[MAXN];
 
 int getMaxHappinessFrom(int root, bool containsRoot)
 {
     int cr = containsRoot ? 1 : 0;
-    if (maxHappiness[root][cr] >= 0)
-        return maxHappiness[root][cr];
     int &ans = maxHappiness[root][cr];
+    if (known[root][cr])
+        return ans;
 
     if (childrenOf[root].empty())
     {
+        known[root][cr] = true;
         return ans = containsRoot ? happiness[root] : 0;
     }
 
@@ -34,9 +36,10 @@ int getMaxHappinessFrom(int root, bool containsRoot)
         ans = 0;
         for (intIter child = childrenOf[root].begin(); child != childrenOf[root].end(); child++)
         {
-            ans += max(ans, max(getMaxHappinessFrom(*child, true), getMaxHappinessFrom(*child, false)));
+            ans += max(getMaxHappinessFrom(*child, true), getMaxHappinessFrom(*child, false));
         }
     }
+    known[root][cr] = true;
     return ans;
 }
 
@@ -66,6 +69,7 @@ int main()
     }
 
     memset(maxHappiness, -1, sizeof(maxHappiness));
+    memset(known, 0, sizeof(known));
     printf("%d\n", max(getMaxHappinessFrom(root, true), getMaxHappinessFrom(root, false)));
 
     return 0;
