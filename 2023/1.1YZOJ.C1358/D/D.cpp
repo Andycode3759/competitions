@@ -1,5 +1,5 @@
 // Fixed on 2023.1.2
-// ACCEPTED
+// AC
 #include <bits/stdc++.h>
 using namespace std;
 const int MAXN = 1e5 + 5;

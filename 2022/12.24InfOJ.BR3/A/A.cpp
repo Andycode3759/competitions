@@ -1,5 +1,5 @@
-//Score: 0/100
-//TLE
+// Score: 0/100
+// TLE
 #include <bits/stdc++.h>
 using namespace std;
 const int MAXN = 2502;

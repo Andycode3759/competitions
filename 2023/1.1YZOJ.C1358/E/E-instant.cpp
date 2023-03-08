@@ -1,5 +1,5 @@
 // 秒出
-// ACCEPTED
+// AC
 #include <bits/stdc++.h>
 using namespace std;
 

@@ -1,4 +1,4 @@
-// ACCEPTED
+// AC
 // Fixed on 1.9 20:42
 #include <bits/stdc++.h>
 using namespace std;

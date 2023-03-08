@@ -1,4 +1,4 @@
-//UNFINISHED
+// Unfinished
 #include <bits/stdc++.h>
 using namespace std;
 string msgYes = "%d,%d are closest, %d,%d are most distant.";
