@@ -1,78 +1,24 @@
-// Unfinished
-// 交个代码证明试了这道题
+// AC
+// Fixed on 2023.3.13
 #include <bits/stdc++.h>
 using namespace std;
-const int MAXN = 1e5 + 5;
-const int MAXCHUNK = 103;
+const int MAXN = 100005;
 
-int island[MAXN];
+long long latestProfit = 0;
 int pos = 0;
-long long lastProfit = 0;
+int cut = 1; // 最靠左边的有宝藏的位置
 
-struct Chunk
-{
-    int data[MAXCHUNK];
-    int size;
-    long long sum = 0;
-    int rleft, rright;
-
-    Chunk(int _s = 0, int _l = 0, int _r = 0)
-    {
-        size = _s;
-        rleft = _l;
-        rright = _r;
-    }
-    int dumpDataFrom(int *start, int *end)
-    {
-        int idx = 0;
-        for (int *i = start; i != end; i++)
-        {
-            data[idx++] = *i;
-        }
-    }
-    void clear(int left, int right)
-    {
-        for (int i = left; i < size && i <= right; i++)
-        {
-            sum -= data[i];
-            data[i] = 0;
-        }
-    }
-    void clearAll()
-    {
-        sum = 0;
-    }
-    long long getValue()
-    {
-        return sum;
-    }
-    long long getRangeValue(int left, int right)
-    {
-        if (sum == 0)
-            return 0;
-        int res = 0;
-        for (int i = left; i <= right; i++)
-        {
-            res += data[i];
-        }
-        return res;
-    }
-};
-
-Chunk chunks[MAXCHUNK];
+int treasure[MAXN];
+long long treasureSum[MAXN]; // 前缀和
 
 int main()
 {
     int n;
     scanf("%d", &n);
-    int chunkSize = sqrt(n);
-    for (int i = 1; i <= chunkSize; i++)
-    {
-        chunks[i] = Chunk(chunkSize, 1 + (i - 1) * chunkSize, i * chunkSize);
-    }
     for (int i = 1; i <= n; i++)
     {
-        scanf("%d", island + i);
+        scanf("%d", treasure + i);
+        treasureSum[i] = treasureSum[i - 1] + treasure[i];
     }
     int q;
     scanf("%d", &q);
@@ -82,36 +28,37 @@ int main()
         scanf("%d", &op);
         switch (op)
         {
-        case 1: {
+        case 1: // move
             int dis, dir;
             scanf("%d%d", &dis, &dir);
-            int newPos = (dir == 1) ? pos - dis : pos + dis;
-            int l = min(newPos, pos), r = max(newPos, pos);
-            pos = newPos;
-            lastProfit = 0;
-            for (int c = l / chunkSize + 1; c <= r / chunkSize + 1; c++)
+            if (dir == 1) // left
             {
-                Chunk &ck = chunks[c];
-                int al = max(l, ck.rleft);
-                int ar = min(r, ck.rright);
-                if (l > ck.rleft || r < ck.rright)
+                latestProfit = 0;
+                pos -= dis;
+                pos = max(pos, 1);
+            }
+            if (dir == 2) // right
+            {
+                int oldPos = pos;
+                pos += dis;
+                pos = min(pos, n);
+                if (pos < cut)
                 {
-                    lastProfit += ck.getRangeValue(al - ck.rleft, ar - ck.rleft);
-                    continue;
+                    latestProfit = 0;
+                    break;
                 }
+                int l = max(oldPos, cut);
+                int r = pos;
+                latestProfit = treasureSum[r] - treasureSum[l - 1];
+                cut = max(cut, pos + 1);
             }
             break;
-        }
-
-        case 2: {
-            printf("%lld\n", lastProfit);
+        case 2: // query latestProfit
+            printf("%lld\n", latestProfit);
             break;
-        }
-
-        case 3: {
+        case 3: // query pos
             printf("%d\n", pos);
             break;
-        }
         }
     }
     return 0;
