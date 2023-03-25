@@ -1,7 +1,7 @@
 *.in
 *.out
 *.exe
-input
-output
+input*
+output*
 .cph/
 .car_running
