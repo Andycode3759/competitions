@@ -7,6 +7,10 @@ vector<int> childOf[MAXN];
 
 string input;
 
+void dfs(int u)
+{
+}
+
 int main()
 {
     int n;
@@ -29,8 +33,11 @@ int main()
             else
             {
                 childOf[father].push_back(i);
+                childOf[i].push_back(father);
             }
         }
+
+        dfs(1);
     }
     return 0;
 }
