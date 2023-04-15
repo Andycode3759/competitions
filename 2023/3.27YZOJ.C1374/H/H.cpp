@@ -1,6 +1,4 @@
-// AC       on POJ (p1330)
-// WA -56%  on YZOJ
-// 玄学
+// AC
 #include <cstdio>
 #include <cstring>
 #include <vector>
@@ -28,10 +26,8 @@ struct Edge
     {
         dest = _d;
         next = _n;
-        // isFatherEdge = _f;
     }
     int dest, next;
-    // bool isFatherEdge; // 是一条儿子指向父亲的边
 };
 vector<Edge> edges;
 int firstEdge[MAXN];
@@ -42,91 +38,63 @@ void addEdge(int src, int dst)
     firstEdge[src] = edges.size() - 1;
 }
 
-int grandfaLog[MAXN][MAX_LOGN]; // 从x出发，向上移动2^i步的祖先；-1表示超出根
-int fatherOf[MAXN];
-int depthOf[MAXN];
+bool hasFa[MAXN];
+int faLog[MAX_LOGN][MAXN]; // 从x出发，向上移动2^i步的祖先；-1表示超出根
+int depth[MAXN];
 void init(int n, int root)
 {
-    for (int i = 0; i < MAX_LOGN; i++)
-    {
-        grandfaLog[root][i] = -1;
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        grandfaLog[i][0] = fatherOf[i];
-    }
     for (int lg = 1; lg < MAX_LOGN; lg++)
     {
         for (int x = 1; x <= n; x++)
         {
-            grandfaLog[x][lg] = grandfaLog[grandfaLog[x][lg - 1]][lg - 1];
+            faLog[lg][x] = faLog[lg - 1][faLog[lg - 1][x]];
         }
     }
 }
-void dfsGetDepth(int x, int depth)
+void dfs(int x, int dep, int fa)
 {
-    depthOf[x] = depth;
+    depth[x] = dep;
+    faLog[0][x] = fa;
     for (int i = firstEdge[x]; i != -1; i = edges[i].next)
     {
         Edge &e = edges[i];
-        // if (e.isFatherEdge)
-        //     continue;
-        dfsGetDepth(e.dest, depth + 1);
+        // printf("%d--->%d\n", x, e.dest);
+
+        dfs(e.dest, dep + 1, x);
     }
 }
 int findLCA(int x, int y)
 {
-    if (depthOf[x] < depthOf[y])
+    if (depth[x] < depth[y])
         swap(x, y);
-    // 保证depthOf[x] >= depthOf[y]
+    // 保证depth[x] >= depth[y]
 
     for (int lg = MAX_LOGN - 1; lg >= 0; lg--) // 上移x
     {
-        int g = grandfaLog[x][lg];
-        if (g <= 0 || depthOf[g] < depthOf[y])
+        int g = faLog[lg][x];
+        if (g <= 0 || depth[g] < depth[y])
         {
             continue;
         }
         else
         {
-            x = grandfaLog[x][lg];
+            x = faLog[lg][x];
         }
     }
-    // 保证depthOf[x]==depthOf[y]
+    // 保证depth[x]==depth[y]
 
     if (x == y)
         return y;
 
     for (int lg = MAX_LOGN - 1; lg >= 0; lg--)
     {
-        if (grandfaLog[x][lg] != grandfaLog[y][lg])
+        if (faLog[lg][x] != faLog[lg][y])
         {
-            x = grandfaLog[x][lg];
-            y = grandfaLog[y][lg];
+            x = faLog[lg][x];
+            y = faLog[lg][y];
         }
     }
-    return fatherOf[x];
-}
-
-bool book[MAXN];
-void dfsColor(int x, int root)
-{
-    if (x == root)
-        return;
-    book[x] = true;
-    dfsColor(fatherOf[x], root);
-}
-int findLCAForce(int x, int y, int root)
-{
-    memset(book, 0, sizeof(book));
-    if (depthOf[x] < depthOf[y])
-        swap(x, y);
-    dfsColor(x, root);
-    while (!book[y])
-    {
-        y = fatherOf[y];
-    }
-    return y;
+    return faLog[0][x];
 }
 
 int main()
@@ -137,9 +105,9 @@ int main()
     while (T--)
     {
         memset(firstEdge, -1, sizeof(firstEdge));
-        memset(grandfaLog, -1, sizeof(grandfaLog));
-        memset(fatherOf, -1, sizeof(fatherOf));
-        memset(depthOf, -1, sizeof(depthOf));
+        memset(faLog, -1, sizeof(faLog));
+        memset(hasFa, false, sizeof(hasFa));
+        memset(depth, -1, sizeof(depth));
         vector<Edge>().swap(edges);
 
         int n;
@@ -152,8 +120,9 @@ int main()
             v = read();
             // scanf("%d%d", &u, &v);
             addEdge(u, v);
+            hasFa[v] = true;
             // addEdge(v, u, true);
-            fatherOf[v] = u;
+            // faLog[0][v] = u;
         }
         int x, y;
         x = read();
@@ -162,16 +131,15 @@ int main()
         int root = 0;
         for (int i = 1; i <= n; i++)
         {
-            if (fatherOf[i] <= 0)
+            if (!hasFa[i])
             {
                 root = i;
                 break;
             }
         }
+        dfs(root, 0, -1);
         init(n, root);
-        dfsGetDepth(root, 0);
         int ans = findLCA(x, y);
-        // int ans = findLCAForce(x, y, root);
         printf("%d\n", ans);
     }
     return 0;

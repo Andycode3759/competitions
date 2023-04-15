@@ -37,19 +37,112 @@ void dfs(int node) // 无向转有向
     }
 }
 
-void addVal(int node, int delta)
-{
-    v[node] += delta;
-}
-long long getSum(int root) // 60%
+// // 暴力 60%
+// void addVal(int node, int delta)
+// {
+//     v[node] += delta;
+// }
+long long getSumDumber(int root)
 {
     long long sum = v[root];
     vector<int> &c = child[root];
     for (int i = 0; i < c.size(); i++)
     {
-        sum += getSum(c[i]);
+        sum += getSumDumber(c[i]);
     }
     return sum;
+}
+
+// "正解" 80%
+int tsp = 0;
+int tiIn[MAXN], tiOrd[MAXN], tiOut[MAXN];
+void dfsTime(int x)
+{
+    tiOrd[++tsp] = x;
+    tiIn[x] = tsp;
+    vector<int> &c = child[x];
+    for (int i = 0; i < c.size(); i++)
+    {
+        dfsTime(c[i]);
+    }
+    tiOut[x] = tsp;
+}
+// void addVal(int node, int delta)
+// {
+//     v[node] += delta;
+// }
+long long getSumDumb(int root)
+{
+    long long sum = 0;
+    for (int i = tiIn[root]; i <= tiOut[root]; i++)
+    {
+        sum += v[tiOrd[i]];
+    }
+    return sum;
+}
+
+// 正解+线段树
+struct SegTreeNode
+{
+    int left, right;
+    long long sum;
+};
+struct SegTree
+{
+    SegTreeNode nodes[2 * MAXN];
+    int size;
+
+    SegTree(int _s)
+    {
+        size = _s;
+    }
+
+    void build(int idx, int l, int r)
+    {
+        nodes[idx].left = l;
+        nodes[idx].right = r;
+        if (l == r)
+        {
+            nodes[idx].sum = v[tiOrd[l]];
+            return;
+        }
+
+        int mid = (l + r) >> 1;
+        build(idx * 2, l, mid);
+        build(idx * 2 + 1, mid + 1, r);
+        nodes[idx].sum = nodes[idx * 2].sum + nodes[idx * 2 + 1].sum;
+
+        // printf("%6d%6d%6lld\n", l, r, nodes[idx].sum);
+    }
+    long long query(int idx, int l, int r)
+    {
+        // printf("query(%d,%d,%d)\n", idx, l, r);
+        SegTreeNode &n = nodes[idx];
+        if (n.left == l && n.right == r)
+        {
+            return n.sum;
+        }
+        int mid = (n.left + n.right) >> 1;
+        long long res = 0;
+        if (l <= mid)
+        {
+            res += query(idx * 2, l, mid);
+        }
+        if (r > mid)
+        {
+            res += query(idx * 2 + 1, mid + 1, r);
+        }
+        return res;
+    }
+};
+
+SegTree sgt(n);
+void addVal(int node, int delta)
+{
+}
+long long getSum(int root)
+{
+    return sgt.query(1, tiIn[root], tiOut[root]);
 }
 
 int main()
@@ -68,6 +161,16 @@ int main()
         addEdge(b, a);
     }
     dfs(r);
+    dfsTime(r);
+
+    // printf("%6s%6s%6s\n", "l", "r", "sum");
+    sgt.build(1, 1, n);
+
+    // printf("     x    in   out\n");
+    // for (int i = 1; i <= n; i++)
+    // {
+    //     printf("%6d%6d%6d\n", i, tiIn[i], tiOut[i]);
+    // }
 
     while (m--)
     {
