@@ -1,12 +1,16 @@
+// AC
 #include <bits/stdc++.h>
 using namespace std;
 const int MAXN = 1000006;
 
 int n;
-int atm[MAXN * 2];
+long long atm[MAXN];
+long long diff[MAXN];
 
+/*
+// 20%
 int preSum[MAXN];
-
+int atm[MAXN * 2];
 int main()
 {
     scanf("%d", &n);
@@ -38,5 +42,32 @@ int main()
     }
     printf("%d\n", ans);
 
+    return 0;
+}
+*/
+int main()
+{
+    scanf("%d", &n);
+    long long tot = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%lld", atm + i);
+        tot += atm[i];
+    }
+    long long avg = tot / n;
+
+    for (int i = 1; i <= n; i++)
+    {
+        diff[i] = diff[i - 1] + avg - atm[i];
+    }
+    sort(diff + 1, diff + 1 + n);
+    long long mid = diff[n / 2 + 1];
+    long long ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        ans += abs(diff[i] - mid);
+    }
+
+    printf("%lld\n", ans);
     return 0;
 }
