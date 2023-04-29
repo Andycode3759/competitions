@@ -1,66 +1,36 @@
-#include <bits/stdc++.h>
+// AC
+// Fixed: 2023/4/22
+#include <algorithm>
+#include <cstdio>
 using namespace std;
-const int MAXN = 1004;
-
-bool board[MAXN];
+const int MAXN = 1006;
+int p[MAXN];
+int x;
 int n;
-int bs;
-int l;
-
-bool play()
-{
-    int t = 1;
-    bool flag = false;
-    for (; t <= bs; t++)
-    {
-        if (t > 1 && board[t] && !board[t - 1])
-        {
-            flag = true;
-            break;
-        }
-    }
-    if (!flag)
-        return false;
-    board[t - 1] = true;
-    board[t] = false;
-    return true;
-}
-
-void printBoard()
-{
-    for (int i = 1; i <= bs; i++)
-    {
-        printf(board[i] ? "O" : ".");
-    }
-    printf("\n");
-}
-
 int main()
 {
     int T;
     scanf("%d", &T);
     while (T--)
     {
-        memset(board, false, sizeof(board));
-        bs = -1;
-        l = (1 << 30) - 1;
-
+        x = 0;
         scanf("%d", &n);
-        for (int i = 0; i < n; i++)
+        for (int i = 1; i <= n; i++)
         {
-            int x;
-            scanf("%d", &x);
-            board[x] = true;
-            bs = max(bs, x);
+            scanf("%d", p + i);
         }
-
-        int turn = 0;
-        while (play())
+        sort(p + 1, p + n + 1);        // 输入的点坐标不一定有序，记得sort
+        for (int i = n; i > 0; i -= 2) // 两两点作为一堆
         {
-            turn++;
-            // printBoard();
+            x ^= (p[i] - p[i - 1] - 1); // 每一堆的距离求“异或和”（把所有数值用异或运算连接）
         }
-        printf(turn % 2 == 1 ? "Peppa will win\n" : "George will win\n");
+        if (x == 0)
+        {
+            printf("George will win\n");
+        }
+        else
+        {
+            printf("Peppa will win\n");
+        }
     }
-    return 0;
 }
