@@ -183,3 +183,86 @@ printf("%d\n", ans % mod);
 ```
 
 ## D - 数圈圈
+
+最暴力的算法就是四维枚举起点和终点的 $x,y$ 坐标，当然可以提前判断相邻的两个字符是否相同，会稍微快一点。
+
+矩形的本质是两对横竖线上连续相同的字符，那么可以考虑算出各个位置的横向、纵向的字符串的哈希值，判断其是否为哈希基数的倍数（一列或一行相同字符）再判断行列是否分别相等（四边由同一种字符组成），就可以快速地判断矩形而无需 $O(n)$ 枚举。
+
+```c++
+const int MAXN = 2008;
+const int MOD = 23;
+
+int modPow[MAXN];
+char canvas[MAXN][MAXN];
+int n, m;
+bool mark[30];
+int hashX[MAXN][MAXN], hashY[MAXN][MAXN];
+
+int findX(int ax, int ay, int bx, int by)
+{
+    return hashX[bx][by] - hashX[ax][ay - 1] * modPow[by - ay + 1];
+}
+int findY(int ax, int ay, int bx, int by)
+{
+    return hashY[bx][by] - hashY[ax - 1][ay] * modPow[bx - ax + 1];
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+
+    modPow[0] = 1;
+    for (int i = 1; i <= max(n, m); i++)    // 预处理出MOD的次方
+    {
+        modPow[i] = modPow[i - 1] * MOD;
+    }
+
+    int lc = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%s", canvas[i] + 1);
+        for (int j = 1; j <= m; j++)
+        {
+            int c = canvas[i][j] - 'a';
+            if (!mark[c])
+                lc++;
+            mark[c] = true;
+
+            hashX[i][j] = hashX[i][j - 1] * MOD + c + 1;    // 计算哈希
+            hashY[i][j] = hashY[i - 1][j] * MOD + c + 1;
+        }
+    }
+    if (lc == 1)
+    {
+        // 子任务3的特殊情况
+        printf("%lld\n", 1LL * m * n * (m - 1) * (n - 1) / 4);
+        return 0;
+    }
+
+    long long ans = 0;
+
+    for (int ax = 1; ax < n; ax++)
+    {
+        for (int ay = 1; ay < m; ay++)
+        {
+            for (int bx = ax + 1; bx <= n; bx++)
+            {
+                if (canvas[bx][ay] != canvas[bx - 1][ay])
+                    break;  // 提前判断相邻位置
+                for (int by = ay + 1; by <= m; by++)
+                {
+                    if (canvas[ax][by] != canvas[ax][by - 1])
+                        break;
+                    if (findX(ax, ay, ax, by) == findX(bx, ay, bx, by) &&
+                        findY(ax, ay, bx, ay) == findY(ax, by, bx, by))
+                        ans++;
+                }
+            }
+        }
+    }
+
+    printf("%lld\n", ans);
+    return 0;
+}
+
+```

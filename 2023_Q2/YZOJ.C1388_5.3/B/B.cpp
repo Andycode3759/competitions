@@ -1,4 +1,7 @@
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <vector>
 using namespace std;
 const int MAXN = 1002;
 
@@ -26,7 +29,7 @@ struct Frac
 };
 struct State
 {
-    bool mark[MAXN];
+    int maxNum = 1;
     vector<int> nums;
 
     Frac getRes()
@@ -48,9 +51,16 @@ struct State
         printf("\n");
     }
 };
+struct StateCmp
+{
+    bool operator()(State a, State b)
+    {
+        return a.nums[0] > b.nums[0];
+    }
+};
 
 Frac goal(0, 0);
-State ans;
+vector<State> ans;
 
 bool dfs(int step, int maxStep, State s)
 {
@@ -58,25 +68,26 @@ bool dfs(int step, int maxStep, State s)
         return false;
     if (s.getRes() == goal && step == maxStep)
     {
-        ans = s;
+        ans.push_back(s);
         return true;
     }
 
-    for (int i = 2; i < MAXN; i++)
+    bool flag = false;
+    for (int i = s.maxNum + 1; i < MAXN; i++)
     {
-        if (s.mark[i])
-            continue;
-        State next;
-        next.nums = s.nums;
+        State next = s;
         next.nums.push_back(i);
-        next.mark[i] = true;
+        next.maxNum = i;
+
         if (dfs(step + 1, maxStep, next))
-        {
-            ans = next;
-            return true;
-        }
+            flag = true;
+        // if (dfs(step + 1, maxStep, next))
+        // {
+        //     // ans = next;
+        //     return true;
+        // }
     }
-    return false;
+    return flag;
 }
 
 int main()
@@ -92,6 +103,9 @@ int main()
             break;
         }
     }
-    ans.print();
+
+    sort(ans.begin(), ans.end(), StateCmp());
+    ans[0].print();
+
     return 0;
 }
