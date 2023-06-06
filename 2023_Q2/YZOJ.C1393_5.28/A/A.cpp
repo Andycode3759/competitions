@@ -1,3 +1,4 @@
+// AC
 #include <algorithm>
 #include <cstdio>
 #include <map>
@@ -36,13 +37,13 @@ struct Rect
 SegTreeNode st[MAXN << 3];
 Rect rects[MAXN];
 
-vector<long long> pos;
-map<long long, int> posRank;
+vector<int> pos;
+// map<long long, int> posRank;
 
 void passDown(int idx)
 {
     SegTreeNode &node = st[idx];
-    SegTreeNode &lc = st[idx * 2], &rc = st[idx * 2 + 1];
+    SegTreeNode &lc = st[idx << 1], &rc = st[(idx << 1) | 1];
     if (node.mark > lc.mark)
     {
         lc.mark = node.mark;
@@ -59,7 +60,7 @@ void passDown(int idx)
 void gatherUp(int idx)
 {
     SegTreeNode &node = st[idx];
-    SegTreeNode &lc = st[idx * 2], &rc = st[idx * 2 + 1];
+    SegTreeNode &lc = st[idx << 1], &rc = st[(idx << 1) | 1];
     node.area = lc.area + rc.area;
 }
 void build(int l, int r, int idx)
@@ -72,8 +73,8 @@ void build(int l, int r, int idx)
         return;
 
     int mid = (l + r) >> 1;
-    build(l, mid, idx * 2);
-    build(mid + 1, r, idx * 2 + 1);
+    build(l, mid, idx << 1);
+    build(mid + 1, r, (idx << 1) | 1);
     gatherUp(idx);
 }
 void update(int l, int r, long long height, int idx)
@@ -90,9 +91,9 @@ void update(int l, int r, long long height, int idx)
 
     int nmid = (node.l + node.r) >> 1;
     if (l <= nmid)
-        update(l, r, height, idx * 2);
+        update(l, r, height, idx << 1);
     if (r > nmid)
-        update(l, r, height, idx * 2 + 1);
+        update(l, r, height, (idx << 1) | 1);
     gatherUp(idx);
 
     // printf("update: [%d,%d] area=%lld mark=%lld\n", node.l, node.r, node.area, node.mark);
@@ -110,9 +111,9 @@ long long query(int l, int r, int idx)
     int nmid = (node.l + node.r) >> 1;
     long long res = 0;
     if (l <= nmid)
-        res += query(l, r, idx * 2);
+        res += query(l, r, idx << 1);
     if (r > nmid)
-        res += query(l, r, idx * 2 + 1);
+        res += query(l, r, (idx << 1) | 1);
     return res;
 }
 
@@ -128,21 +129,18 @@ int main()
         pos.push_back(rects[i].s);
         pos.push_back(rects[i].t);
     }
-    sort(pos.begin(), pos.end());
+    sort(pos.begin(), pos.end()); // 离散化
     unique(pos.begin(), pos.end());
-    for (int i = 0; i < pos.size(); i++)
-    {
-        // printf("posRank[%d]=%d\n", pos[i], i + 1);
 
-        posRank[pos[i]] = i + 1;
-    }
     sort(rects, rects + n);
     build(1, pos.size() - 1, 1);
 
     for (int i = 0; i < n; i++)
     {
         Rect &r = rects[i];
-        update(posRank[r.s], posRank[r.t] - 1, r.h, 1);
+        int idxS = lower_bound(pos.begin(), pos.end(), r.s) - pos.begin();
+        int idxT = lower_bound(pos.begin(), pos.end(), r.t) - pos.begin();
+        update(idxS + 1, idxT, r.h, 1);
     }
 
     printf("%lld\n", query(1, pos.size() - 1, 1));
