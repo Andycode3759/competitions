@@ -1,99 +1,64 @@
+// AC
+// Fixed: 2023.6.10
+#include <algorithm>
 #include <cstdio>
 #include <vector>
-#include <algorithm>
 using namespace std;
 const int MAXN = 1000006;
-const int INF = (1<<30)-1;
+const int INF = (1 << 30) - 1;
 
-struct Edge
+struct Node
 {
-    Edge(int _p1,int _p2,int _c)
+    int val, idx;
+
+    const bool operator<(const Node &a) const
     {
-        p1=_p1,p2=_p2;
-        cost=_c;
+        return val < a.val;
     }
-    int p1,p2;
-    int cost;
 };
-vector<Edge> edges;
 
-int n,p;
 int arr[MAXN];
-
-//segtree
-int stMin[MAXN<<2];
-void stBuild(int l,int r,int idx)
-{
-    if(l==r)
-    {
-        stMin[idx]=arr[l];
-        return;
-    }
-
-    int mid=(l+r)>>1;
-    stBuild(l,mid,idx<<1);
-    stBuild(mid+1,r,(idx<<1)|1);
-    stMin[idx]=min(stMin[idx<<1],stMin[(idx<<1)|1]);
-}
-int stGetMin(int l,int r,int nl,int nr,int idx)
-{
-    if(l<=nl&&r>=nr)
-    {
-        return stMin[idx];
-    }
-    int nmid=(nl+nr)>>1;
-    int res=INF;
-    if(l<=nmid) res=min(res,stGetMin(l,r,l,nmid,idx<<1));
-    if(r>nmid) res=min(res,stGetMin(l,r,nmid+1,r,(idx<<1)|1));
-    return res;
-}
-
-//union find set
-int ufsFa[MAXN];
-void ufsInit()
-{
-    for(int i=1;i<=n;i++)
-        fa[i]=i;
-}
-void ufsAdd(int a,int b)
-{
-    ufsFa[a]=ufsGetFa(b);
-}
-int ufsGetFa(int a)
-{
-    if(ufsFa[a]==a) return a;
-    else return ufsFa[a]=ufsGetFa(ufsFa[a]);
-}
-
-bool checkGcd(int l,int r)
-{
-}
+Node nodes[MAXN];
+bool flag[MAXN];
+int n, p;
 
 int main()
 {
-    freopen("mst.in","r",stdin);
-    freopen("mst.out","w",stdout);
+    freopen("mst.in", "r", stdin);
+    freopen("mst.out", "w", stdout);
 
-    int mxa=1;
-    scanf("%d%d",&n,&p);
-    for(int i=1;i<=n;i++)
+    scanf("%d%d", &n, &p);
+    for (int i = 1; i <= n; i++)
     {
-        scanf("%d",arr+i);
-        mxa=max(mxa,arr[i]);
-        if(i>1) edges.push_back(Edge(i-1,i,p));
+        scanf("%d", arr + i);
+        nodes[i].val = arr[i];
+        nodes[i].idx = i;
     }
-    stBuild(1,n,1);
-    if(p==1 || mxa==1)
+    sort(nodes + 1, nodes + 1 + n);
+
+    long long contribute = 0;
+    for (int i = 1; i <= n; i++)
     {
-        printf("%d\n",n-1);
-        return 0;
+        int x = nodes[i].val, xi = nodes[i].idx;
+
+        // printf("x=%d xi=%d\n", x, xi);
+
+        if (x >= p)
+            break;
+        if (flag[xi])
+            continue;
+        int l = xi, r = xi;
+        for (; l >= 1 && arr[l] % x == 0; l--)
+            flag[l] = true;
+        flag[l++] = false;
+        for (; r <= n && arr[r] % x == 0; r++)
+            flag[r] = true;
+        flag[r--] = false;
+        contribute += 1LL * (r - l) * (p - x);
+
+        // printf("chunk [%d,%d] gcd=%d\n", l, r, x);
     }
-    for(int l=1;i<=n;l++)
-    {
-        for(int r=l+1;r<=n;r++)
-        {
-            if(checkGcd(l,r)) edges.push_back(Edge(l,r,stGetMin(l,r,1,n,1)));
-        }
-    }
+
+    printf("%lld\n", 1LL * p * (n - 1) - contribute);
     return 0;
 }

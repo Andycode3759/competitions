@@ -29,23 +29,14 @@ int solveSP1() // n<=8, m<=8
     return res;
 }
 
-int o[MAXN], e[MAXN];
 int solveSP2() // m=2
 {
-    o[0] = 1, e[0] = 0;
-    o[1] = 0, e[1] = 1;
-    o[2] = 2, e[2] = 1;
-    // printf("%7c%7c%7c\n", 'i', 'o', 'e');
-    for (int i = 3; i <= n; i++)
+    int res = 1;
+    for (int i = 1; i <= n; i++)
     {
-        o[i] = e[i - 1], e[i] = e[i - 1] + o[i - 1];
-        if (i % 2 == 0)
-            e[i]--;
-        if (e[i] >= MOD)
-            e[i] -= MOD;
-        // printf("%7d%7d%7d\n", i, o[i], e[i]);
+        res = (res << 1) % MOD;
     }
-    return (o[n] + e[n]) % MOD;
+    return res;
 }
 int solveGeneral()
 {
@@ -55,7 +46,7 @@ int solveGeneral()
 int main()
 {
     freopen("func.in", "r", stdin);
-    freopen("func.out", "w", stdout);
+    // freopen("func.out", "w", stdout);
 
     scanf("%d%d", &m, &n);
     if (n <= SP && m <= SP)
