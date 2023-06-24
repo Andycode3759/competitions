@@ -1,6 +1,6 @@
-#include <algorithm>
+// AC
 #include <cstdio>
-#include <cstring>
+#include <utility>
 using namespace std;
 const int MAXN = 1000006;
 
@@ -17,62 +17,86 @@ struct BigInt
             c = getchar();
         while (c >= '0' && c <= '9')
         {
-            c = getchar();
             data[digit++] = c - '0';
+            c = getchar();
+        }
+        for (int i = 0; i < digit / 2; i++)
+        {
+            swap(data[i], data[digit - i - 1]);
+        }
+    }
+    void print()
+    {
+        if (digit == 0)
+        {
+            printf("0\n");
+            return;
+        }
+        for (int i = digit - 1; i >= 0; i--)
+        {
+            printf("%c", data[i] + '0');
+        }
+        printf("\n");
+    }
+    void subtract(int x)
+    {
+        data[0] -= x;
+        for (int i = 0; data[i] < 0; i++)
+        {
+            int r = (-data[i] - 1) / 10 + 1;
+            data[i + 1] -= r;
+            data[i] += 10 * r;
+        }
+        updateDigit();
+    }
+    void half()
+    {
+        int left = 0;
+        for (int i = digit - 1; i >= 0; i--)
+        {
+            left = left * 10 + data[i];
+            data[i] = left / 2;
+            left %= 2;
+        }
+        updateDigit();
+    }
+    void updateDigit()
+    {
+        for (int i = digit - 1; i >= 0; i--)
+        {
+            if (data[i] != 0)
+                break;
+            else
+                digit--;
         }
     }
 };
 
-// BigInt num;
-int num;
-bool fmark[MAXN], dmark[MAXN];
-int k;
+BigInt num;
+// long long num;
 
 int main()
 {
-    fmark[1] = true;
-    for (int d = 2; d < MAXN; d++)
-    {
-        if (fmark[d])
-            continue;
-        for (int f = 1; f * d < MAXN; f++)
-        {
-            fmark[d * f] = true;
-        }
-    }
     int T;
     scanf("%d", &T);
     while (T--)
     {
-        k = 0;
-        memset(dmark, false, sizeof(dmark));
-        // num.clearAndRead();
-        scanf("%d", &num);
-        if (fmark[num])
+        num.clearAndRead();
+        if (num.digit <= 1 && num.data[0] <= 2)
+            printf("1\n");
+        else if (num.data[0] % 2 == 1)
         {
-            for (int i = 1; i <= num; i++)
-            {
-                dmark[i] = fmark[i] ? (__gcd(i, num) == 1) : true;
-                if (dmark[i])
-                    k++;
-            }
-            int count = 0;
-            for (int i = 1; i <= num; i++)
-            {
-                if (dmark[i])
-                    count++;
-                if (count == (k + 1) / 2)
-                {
-                    printf("%d\n", i);
-                    break;
-                }
-            }
+            num.subtract(1);
+            num.half();
+            num.print();
         }
         else
         {
-            printf("%d\n", num >> 1);
+            bool isMult = (num.data[0] + num.data[1] * 10) % 4 == 0;
+            num.half();
+            num.subtract(isMult ? 1 : 2);
+            num.print();
         }
     }
-
     return 0;
 }
