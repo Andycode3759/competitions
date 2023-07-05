@@ -1,4 +1,3 @@
-// AC
 #include <cstdio>
 using namespace std;
 const int MAXN = 5005;
@@ -59,28 +58,34 @@ struct BigInt
 };
 
 BigInt ans[MAXN];
+int query[12], maxq = -1;
 
 int main()
 {
     int T;
     scanf("%d", &T);
     ans[0].assign1();
-    while (T--)
+    for (int i = 1; i <= T; i++)
     {
-        int n;
-        scanf("%d", &n);
-        for (int i = 1; i <= MAXN; i++)
+        scanf("%d", query + i);
+        maxq = max(maxq, query[i]);
+    }
+
+    for (int i = 1; i <= MAXN; i++)
+    {
+        ans[i].assign0();
+    }
+    for (int m = 1; m <= maxq; m++)
+    {
+        for (int i = m; i <= maxq; i++)
         {
-            ans[i].assign0();
+            ans[i].add(ans[i - m]);
         }
-        for (int m = 1; m <= n; m++)
-        {
-            for (int i = m; i <= n; i++)
-            {
-                ans[i].add(ans[i - m]);
-            }
-        }
-        ans[n].print();
+    }
+
+    for (int i = 1; i <= T; i++)
+    {
+        ans[query[i]].print();
     }
 
     return 0;

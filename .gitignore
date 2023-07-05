@@ -3,5 +3,6 @@
 *.exe
 input*
 output*
+*.pdf
 .cph/
 .car_running
