@@ -1,17 +1,10 @@
+#include <algorithm>
 #include <cstdio>
 using namespace std;
 const int MAXN = 100005;
 const int MAX_LG = 19;
 const int INF = (1 << 30) - 1;
-
-constexpr const int min(const int &a, const int &b)
-{
-    return a < b ? a : b;
-}
-constexpr const int max(const int &a, const int &b)
-{
-    return a > b ? a : b;
-}
+const long long INF_LL = (1LL << 62) - 1;
 
 struct Round
 {
@@ -22,61 +15,55 @@ Round rounds[MAXN];
 int arrA[MAXN], arrB[MAXN];
 int stMaxA[MAX_LG][MAXN], stMinA[MAX_LG][MAXN];
 int stMaxB[MAX_LG][MAXN], stMinB[MAX_LG][MAXN];
+int stMinPosA[MAX_LG][MAXN], stMaxNegA[MAX_LG][MAXN];
 int n, m, q;
 int lg2[MAXN];
 
-int getMinA(int l, int r)
+inline int getMinA(int l, int r)
 {
     int lg = lg2[r - l + 1];
     return min(stMinA[lg][r], stMinA[lg][l + (1 << lg) - 1]);
 }
-int getMaxA(int l, int r)
+inline int getMaxA(int l, int r)
 {
     int lg = lg2[r - l + 1];
     return max(stMaxA[lg][r], stMaxA[lg][l + (1 << lg) - 1]);
 }
-int getMinB(int l, int r)
+inline int getMinPosA(int l, int r)
+{
+    int lg = lg2[r - l + 1];
+    return min(stMinPosA[lg][r], stMinPosA[lg][l + (1 << lg) - 1]);
+}
+inline int getMaxNegA(int l, int r)
+{
+    int lg = lg2[r - l + 1];
+    return max(stMaxNegA[lg][r], stMaxNegA[lg][l + (1 << lg) - 1]);
+}
+inline int getMinB(int l, int r)
 {
     int lg = lg2[r - l + 1];
     return min(stMinB[lg][r], stMinB[lg][l + (1 << lg) - 1]);
 }
-int getMaxB(int l, int r)
+inline int getMaxB(int l, int r)
 {
     int lg = lg2[r - l + 1];
     return max(stMaxB[lg][r], stMaxB[lg][l + (1 << lg) - 1]);
 }
-void solveSP1And2()
+inline void solveSP1And2()
 {
     long long res = 0;
     for (int i = 1; i <= q; i++)
     {
         Round &r = rounds[i];
         if (r.l1 == r.r1)
-        {
-            // choose min(arrB)
             res = 1LL * getMinB(r.l2, r.r2) * arrA[r.r1];
-            // int best = INF;
-            // for (int i = r.l2; i <= r.r2; i++)
-            // {
-            //     best = min(best, arrB[i]);
-            // }
-            // res = 1LL * arrA[r.l1] * best;
-        }
         else // r.l2 == r.r2
-        {
-            // choose max(arrA)
             res = 1LL * getMaxA(r.l1, r.r1) * arrB[r.r2];
-            // int best = -INF;
-            // for (int i = r.l1; i <= r.r1; i++)
-            // {
-            //     best = max(best, arrA[i]);
-            // }
-            // res = 1LL * arrB[r.l2] * best;
-        }
+
         printf("%lld\n", res);
     }
 }
-void solveSP1()
+inline void solveSP1()
 {
     long long res = 0;
     for (int i = 1; i <= q; i++)
@@ -88,7 +75,7 @@ void solveSP1()
         printf("%lld\n", res);
     }
 }
-void solveSP2()
+inline void solveSP2()
 {
     long long res = 0;
     for (int i = 1; i <= q; i++)
@@ -97,44 +84,48 @@ void solveSP2()
         if (r.l1 == r.r1)
         {
             if (arrA[r.l1] == 0)
-            {
                 res = 0;
-            }
             else if (arrA[r.l1] > 0)
-            {
                 res = 1LL * getMinB(r.l2, r.r2) * arrA[r.r1];
-            }
             else // arrA[r.l1] < 0
-            {
                 res = 1LL * getMaxB(r.l2, r.r2) * arrA[r.r1];
-            }
         }
         else // r.l2 == r.r2
         {
-            if (arrA[r.l2] == 0)
-            {
+            if (arrB[r.l2] == 0)
                 res = 0;
-            }
-            else if (arrA[r.l2] > 0)
-            {
+            else if (arrB[r.l2] > 0)
                 res = 1LL * getMaxA(r.l1, r.r1) * arrB[r.r2];
-            }
             else // arrA[r.l2] < 0
-            {
                 res = 1LL * getMinA(r.l1, r.r1) * arrB[r.r2];
-            }
         }
         printf("%lld\n", res);
     }
 }
-void solveGeneral()
+inline void solveGeneral()
 {
+    for (int i = 1; i <= q; i++)
+    {
+        long long res = -INF_LL;
+        Round &r = rounds[i];
+        int minl = getMinA(r.l1, r.r1);
+        int maxl = getMaxA(r.l1, r.r1);
+        int minPosL = getMinPosA(r.l1, r.r1);
+        int maxNegL = getMaxNegA(r.l1, r.r1);
+        int minq = getMinB(r.l2, r.r2);
+        int maxq = getMaxB(r.l2, r.r2);
+        res = max(res, 1LL * maxl * (maxl >= 0 ? minq : maxq));
+        res = max(res, 1LL * minl * (minl >= 0 ? minq : maxq));
+        if (minPosL != INF)
+            res = max(res, 1LL * minPosL * (minPosL >= 0 ? minq : maxq));
+        if (maxNegL != -INF)
+            res = max(res, 1LL * maxNegL * (maxNegL >= 0 ? minq : maxq));
+        printf("%lld\n", res);
+    }
 }
 
 int main()
 {
-    freopen("game.in", "r", stdin);
-    freopen("game.out", "w", stdout);
 
     bool sp1 = true, sp2 = true;
     scanf("%d%d%d", &n, &m, &q);
@@ -146,6 +137,8 @@ int main()
     {
         scanf("%d", arrA + i);
         stMaxA[0][i] = stMinA[0][i] = arrA[i];
+        stMinPosA[0][i] = (arrA[i] >= 0) ? arrA[i] : INF;
+        stMaxNegA[0][i] = (arrA[i] < 0) ? arrA[i] : -INF;
         if (arrA[i] <= 0)
             sp1 = false;
     }
@@ -171,6 +164,8 @@ int main()
         {
             stMaxA[lg][i] = max(stMaxA[lg - 1][i], stMaxA[lg - 1][i - (1 << (lg - 1))]);
             stMinA[lg][i] = min(stMinA[lg - 1][i], stMinA[lg - 1][i - (1 << (lg - 1))]);
+            stMinPosA[lg][i] = min(stMinPosA[lg - 1][i], stMinPosA[lg - 1][i - (1 << (lg - 1))]);
+            stMaxNegA[lg][i] = max(stMaxNegA[lg - 1][i], stMaxNegA[lg - 1][i - (1 << (lg - 1))]);
         }
     }
     for (int lg = 1, len = (1 << lg); len <= m; lg++, len = (1 << lg))

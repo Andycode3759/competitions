@@ -1,24 +1,9 @@
 #include <cstdio>
 using namespace std;
-const int MAXN = 1003;
+const int MAXN = 500005;
 
-bool graph[MAXN][MAXN];
-int outCnt[MAXN];
+int inCnt[MAXN], inCntExist[MAXN], sum;
 int n, m, q;
-bool vis[MAXN];
-
-bool dfs(int x)
-{
-    if (vis[x])
-        return true;
-    vis[x] = true;
-    for (int i = 1; i <= n; i++)
-    {
-        if (graph[x][i] && dfs(i))
-            return true;
-    }
-    return false;
-}
 
 int main()
 {
@@ -30,8 +15,8 @@ int main()
     for (int i = 1; i <= m; i++)
     {
         scanf("%d%d", &u, &v);
-        graph[u][v] = true;
-        outCnt[u]++;
+        inCnt[u]++, inCntExist[u]++;
+        sum += inCnt[u];
     }
     scanf("%d", &q);
     for (int i = 1; i <= q; i++)
@@ -41,60 +26,28 @@ int main()
         {
             scanf("%d%d", &u, &v);
             if (op == 1)
-                graph[u][v] = false, outCnt[u]--;
+                inCnt[u]--, sum--;
             else // op == 3
-                graph[u][v] = true, outCnt[u]++;
+                inCnt[u]++, sum++;
         }
         else
         {
             scanf("%d", &u);
             if (op == 2)
             {
-                for (int i = 1; i <= n; i++)
+                if (inCnt[u] > 0)
                 {
-                    if (graph[i][u])
-                        outCnt[i]--;
-                    graph[i][u] = false;
+                    sum -= inCnt[u];
+                    inCnt[u] = 0;
                 }
             }
             else // op == 4
             {
-                for (int i = 1; i <= n; i++)
-                {
-                    if (!graph[i][u])
-                        outCnt[i]++;
-                    graph[i][u] = true;
-                }
+                inCnt[u] = inCntExist[u];
+                sum += inCnt[u];
             }
         }
-        bool flag = false;
-        for (int i = 1; i <= n; i++)
-        {
-            if (outCnt[i] != 1)
-            {
-                printf("NO\n");
-                flag = true;
-                break;
-            }
-        }
-        if (flag)
-            continue;
-        for (int i = 1; i <= n; i++)
-            vis[i] = false;
-        for (int i = 1; i <= n; i++)
-        {
-            if (vis[i])
-                continue;
-            if (!dfs(i))
-            {
-                printf("NO\n");
-                flag = true;
-                break;
-            }
-        }
-        if (flag)
-            continue;
-        printf("YES\n");
+        printf(sum == n ? "YES\n" : "NO\n");
     }
     return 0;
 }

@@ -1,11 +1,18 @@
-#include <algorithm>
+// AC
+// 但是Hack没过
 #include <cstdio>
+#include <queue>
+#include <vector>
 using namespace std;
 const int MAXN = 2505;
 const int MAXM = 10004;
 const int INF = (1 << 30) - 1;
 
-int readInt()
+constexpr long long max(const long long &a, const long long &b)
+{
+    return a > b ? a : b;
+}
+inline int readInt()
 {
     int res = 0;
     char c = getchar();
@@ -18,7 +25,7 @@ int readInt()
     }
     return res;
 }
-long long readLL()
+inline long long readLL()
 {
     long long res = 0;
     char c = getchar();
@@ -32,98 +39,91 @@ long long readLL()
     return res;
 }
 
-struct Edge
-{
-    int a, b;
-};
-Edge edges[MAXM];
-struct Place
-{
-    int idx;
-    long long score;
-
-    const bool operator<(const Place &a) const
-    {
-        return score > a.score;
-    }
-};
-Place places[MAXN];
-
 int n, m, k;
+long long score[MAXN];
 int graph[MAXN][MAXN];
+vector<int> outs1[MAXN], outs2[MAXN];
+long long bestScore[6][MAXN]; // 第step步走在i点上时，目前能够获得的最大得分
 
-long long solveSP1() // k=0
+long long ans = -1;
+
+bool vis[MAXN];
+inline void dfs(int cur, int step, long long sum)
 {
-    for (int id1 = 2; id1 <= n; id1++)
+    if (step > 4)
     {
-        for (int id2 = id1 + 1; id2 <= n; id2++)
-        {
-            for (int id3 = id2 + 1; id3 <= n; id3++)
-            {
-                for (int id4 = id3 + 1; id4 <= n; id4++)
-                {
-                    int perm[] = {id1, id2, id3, id4};
-                    do
-                    {
-                        int d1 = places[perm[0]].idx, d2 = places[perm[1]].idx, d3 = places[perm[2]].idx,
-                            d4 = places[perm[3]].idx;
-                        if (graph[1][d1] == 1 && graph[d1][d2] == 1 && graph[d2][d3] == 1 && graph[d3][d4] == 1 &&
-                            graph[d4][1] == 1)
-                        {
-                            return places[perm[0]].score + places[perm[1]].score + places[perm[2]].score +
-                                   places[perm[3]].score;
-                        }
-                    } while (next_permutation(perm, perm + 4));
-                }
-            }
-        }
+        if (graph[cur][1] <= k + 1)
+            ans = max(ans, sum);
+        return;
     }
-    return -1;
+    if (sum < bestScore[step][cur])
+        return;
+    bestScore[step][cur] = sum;
+    int len = outs2[cur].size();
+    for (int i = 0; i < len; i++)
+    {
+        int v = outs2[cur][i];
+        if (vis[v])
+            continue;
+        // for (int i = 1; i < step; i++)
+        //     printf("  ");
+        // printf("%d -> %d\n", cur, v);
+        vis[v] = true;
+        dfs(v, step + 1, sum + score[v]);
+        vis[v] = false;
+    }
 }
-long long solveGeneral()
+
+inline void bfs(int st)
 {
-    for (int k = 1; k <= n; k++)
+    queue<int> Q;
+    Q.push(st);
+    vis[st] = true;
+    while (!Q.empty())
     {
-        for (int i = 1; i <= n; i++)
+        int t = Q.front();
+        Q.pop();
+        int len = outs1[t].size();
+        for (int i = 0; i < len; i++)
         {
-            for (int j = 1; j <= n; j++)
+            int v = outs1[t][i];
+            if (!vis[v])
             {
-                if (graph[i][k] + graph[k][j] < graph[i][j])
-                    graph[i][j] = graph[i][k] + graph[k][j];
-            }
-        }
-    }
-    for (int id1 = 2; id1 <= n; id1++)
-    {
-        for (int id2 = id1 + 1; id2 <= n; id2++)
-        {
-            for (int id3 = id2 + 1; id3 <= n; id3++)
-            {
-                for (int id4 = id3 + 1; id4 <= n; id4++)
+                graph[st][v] = graph[st][t] + 1;
+                if (graph[st][v] < k + 1)
                 {
-                    int perm[] = {id1, id2, id3, id4};
-                    do
-                    {
-                        int d1 = places[perm[0]].idx, d2 = places[perm[1]].idx, d3 = places[perm[2]].idx,
-                            d4 = places[perm[3]].idx;
-                        if (graph[1][d1] <= k + 1 && graph[d1][d2] <= k + 1 && graph[d2][d3] <= k + 1 &&
-                            graph[d3][d4] <= k + 1 && graph[d4][1] <= k + 1)
-                        {
-                            return places[perm[0]].score + places[perm[1]].score + places[perm[2]].score +
-                                   places[perm[3]].score;
-                        }
-                    } while (next_permutation(perm, perm + 4));
+                    Q.push(v);
                 }
+                vis[v] = true;
             }
         }
     }
-    return -1;
+}
+
+inline void printGraph()
+{
+    printf("    ");
+    for (int i = 1; i <= n; i++)
+        printf("%4d", i);
+    printf("\n");
+    for (int i = 1; i <= n; i++)
+    {
+        printf("%4d", i);
+        for (int j = 1; j <= n; j++)
+        {
+            if (graph[i][j] >= INF)
+                printf(" INF");
+            else
+                printf("%4d", graph[i][j]);
+        }
+        printf("\n");
+    }
 }
 
 int main()
 {
-    freopen("holiday.in", "r", stdin);
-    freopen("holiday.out", "w", stdout);
+    // freopen("holiday-hack.in", "r", stdin);
+    // freopen("holiday.out", "w", stdout);
 
     // scanf("%d%d%d", &n, &m, &k);
     n = readInt();
@@ -132,10 +132,8 @@ int main()
     for (int i = 2; i <= n; i++)
     {
         // scanf("%lld", score + i);
-        places[i].score = readLL();
-        places[i].idx = i;
+        score[i] = readLL();
     }
-    sort(places + 2, places + 1 + n);
     for (int i = 1; i <= n; i++)
     {
         for (int j = 1; j <= n; j++)
@@ -146,16 +144,36 @@ int main()
     for (int i = 1; i <= m; i++)
     {
         // scanf("%d%d", &edges[i].a, &edges[i].b);
-        edges[i].a = readInt();
-        edges[i].b = readInt();
-        graph[edges[i].a][edges[i].b] = 1;
-        graph[edges[i].b][edges[i].a] = 1;
+        int u = readInt(), v = readInt();
+        outs1[u].push_back(v);
+        outs1[v].push_back(u);
     }
 
-    if (k == 0)
-        printf("%lld\n", solveSP1());
-    else
-        printf("%lld\n", solveGeneral());
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= n; j++)
+        {
+            graph[i][j] = (i == j) ? 0 : INF;
+            vis[j] = false;
+        }
+        bfs(i);
+    }
+
+    // printGraph();
+
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= n; j++)
+        {
+            if (i != j && graph[i][j] <= k + 1)
+                outs2[i].push_back(j);
+        }
+    }
+    for (int i = 2; i <= n; i++)
+        vis[i] = false;
+    vis[1] = true;
+    dfs(1, 1, 0);
+    printf("%lld\n", ans);
 
     return 0;
 }
