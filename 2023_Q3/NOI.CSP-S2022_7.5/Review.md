@@ -425,7 +425,7 @@ else // r.l2 == r.r2
 ```c++
 bool graph[MAXN][MAXN];
 bool exist[MAXN][MAXN]; // 注意还需要记录一条边是否存在，供操作2和4判断
-// 考试时就是因为没有考虑这个而少得了15分，警钟撅烂
+// 考试时就是因为没有考虑这个而少得了15分，警钟撅烂x2
 int outCnt[MAXN];
 int n, m, q;
 

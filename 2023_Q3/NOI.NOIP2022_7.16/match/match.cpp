@@ -1,7 +1,8 @@
 #include <cstdio>
+#include <cstring>
 using namespace std;
 typedef unsigned long long ulong;
-const int MAXN = 250005;
+const int MAXN = 3003;
 const int MAX_LOG = 19;
 
 inline const int read()
@@ -27,6 +28,7 @@ int q;
 int ql[MAXN], qr[MAXN];
 int stMaxA[MAX_LOG][MAXN], stMaxB[MAX_LOG][MAXN];
 int lg2[MAXN];
+ulong sum[MAXN][MAXN];
 
 inline int getMaxA(int l, int r)
 {
@@ -73,16 +75,21 @@ int main()
         }
     }
 
+    for (int l = 1; l <= n; l++)
+    {
+        for (int r = l; r <= n; r++)
+        {
+            sum[l][r] = sum[l][r - 1] + getMaxA(l, r) * getMaxB(l, r);
+        }
+    }
+
     for (int i = 1; i <= q; i++)
     {
         ulong res = 0;
         int l = ql[i], r = qr[i];
-        for (int ll = l; ll <= r; ll++)
+        for (int i = l; i <= r; i++)
         {
-            for (int rr = ll; rr <= r; rr++)
-            {
-                res += getMaxA(ll, rr) * getMaxB(ll, rr);
-            }
+            res += sum[i][r];
         }
         printf("%llu\n", res);
     }

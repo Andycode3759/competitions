@@ -76,6 +76,16 @@ int main()
                 opMatch(a, b);
             }
         }
+        if (op < m)
+        {
+            printf("Case %d: FAILED (too few operations: Got %d, at least %d)\n", Kase, op, m);
+            continue;
+        }
+        if (op > 2 * m)
+        {
+            printf("Case %d: FAILED (too many operations: Got %d, at most %d)\n", Kase, op, 2 * m);
+            continue;
+        }
         if (head <= m)
         {
             printf("Case %d: FAILED (%d card(s) remain in pile)\n", Kase, m - head + 1);
