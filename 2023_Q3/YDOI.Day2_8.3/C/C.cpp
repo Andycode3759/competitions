@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <vector>
+#include <map>
 using namespace std;
 const int MAXN = 500005;
 
@@ -20,17 +21,7 @@ int n,q;
 int col[MAXN];
 int fa[MAXN];
 vector<int> child[MAXN];
-
-bool mark[MAXN];
-void dfs(int cur)
-{
-    mark[cur]=true;
-    for(int i=0,len=child[cur].size();i<len;i++)
-    {
-        int v=child[cur][i];
-        if(col[v]==col[cur]) dfs(v);
-    }
-}
+map<int,int> colCnt[MAXN];
 
 int main()
 {
@@ -39,6 +30,8 @@ int main()
     for(int i=1;i<=n;i++) 
         //scanf("%d",col+i);
         col[i]=read();
+    
+    int ans=1;
     for(int i=2;i<=n;i++)
     {
         int t;
@@ -46,12 +39,10 @@ int main()
         t=read();
         child[t].push_back(i);
         fa[i]=t;
+        if(col[i]!=col[t]) ans++;
+        colCnt[t][col[i]]++;
     }
-    int ans=0;
-    for(int i=1;i<=n;i++)
-    {
-        if(!mark[i]) dfs(i),ans++;
-    }
+
     for(int i=1;i<=q;i++)
     {
         int x,t;
@@ -63,21 +54,19 @@ int main()
             continue;
         }
         
-        for(int i=0,len=child[x].size();i<len;i++)
-        {
-            int v=child[x][i];
-            if(col[x]==col[v]) ans++;
-            if(t==col[v]) ans--;
-        }
-        if(col[x]==col[fa[x]])
-        {
-            ans++;
-        }
-        else if(t==col[fa[x]])
-        {
-            ans--;
-        }
-        
+        // for(int i=0,len=child[x].size();i<len;i++)
+        // {
+        //     int v=child[x][i];
+        //     if(col[x]==col[v]) ans++;
+        //     if(t==col[v]) ans--;
+        // }
+        ans+=colCnt[x][col[x]];
+        ans-=colCnt[x][t];
+        if(col[x]==col[fa[x]]) ans++;
+        else if(t==col[fa[x]]) ans--;
+
+        colCnt[fa[x]][col[x]]--;
+        colCnt[fa[x]][t]++;
         col[x]=t;
         printf("%d\n",ans);
     }
