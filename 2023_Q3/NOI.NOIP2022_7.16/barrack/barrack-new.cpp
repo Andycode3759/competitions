@@ -1,10 +1,10 @@
 #include <cstdio>
 #include <stack>
 using namespace std;
-typedef unsigned long long ulong;
-const int MAXN = 500005;
-const int MAXM = 1000006;
-const int MOD = 1e9 + 7;
+constexpr int MAXN = 500005;
+constexpr int MAXM = 1000006;
+constexpr int MOD = 1e9 + 7;
+using ll = long long;
 
 struct Edge
 {
@@ -35,13 +35,13 @@ Graph G1, G2;
 stack<int> S;
 int n, m;
 int low[MAXN], dfn[MAXN], belong[MAXN];
-ulong sum[MAXN];
+ll sum[MAXN];
 bool vis[MAXN];
 int stmp = 0, dccCnt = 0;
-ulong ans = 0;
-ulong E[MAXN], V[MAXN];
-ulong pow2[MAXM];
-ulong dp[2][MAXN];
+ll ans = 0;
+ll E[MAXN], V[MAXN];
+ll pow2[MAXM];
+ll dp[2][MAXN];
 
 void tarjan(int fa, int cur)
 {
